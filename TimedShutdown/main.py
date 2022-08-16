@@ -112,6 +112,7 @@ def timedShutdown():
     return int(total_time.get())
 
 
+# https://www.geeksforgeeks.org/create-countdown-timer-using-python-tkinter/
 def timer(total_time):
     from tkinter import messagebox
 
