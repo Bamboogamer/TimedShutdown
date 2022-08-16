@@ -4,11 +4,13 @@ import time
 import tkinter as tk
 from tkinter import *
 
+# Fonts
 font_courier10B = "Courier 10 bold"
 font_courier12B = "Courier 12 bold"
 font_courier18B = "Courier 18 bold"
 font_courier22B = "Courier 22 bold"
 
+# Entry Box size
 entrySize = 15
 
 
@@ -27,16 +29,15 @@ def convertTimeToSeconds(num, time_str):
         # print("{} {} = {} Seconds".format(num, time_str, result))
 
     elif time_str in ["hour", "hours", "hr", "h"]:
-        result = int(result * (60*60))
+        result = int(result * (60 * 60))
         # print("{} {} = {} Seconds".format(num, time_str, result))
 
     return result
 
 
 def convertSecondsToTime(seconds):
-
-    hours = seconds // (60*60)
-    seconds -= (60*60)*hours
+    hours = seconds // (60 * 60)
+    seconds -= (60 * 60) * hours
 
     minutes = seconds // 60
     seconds -= 60 * minutes
@@ -52,12 +53,14 @@ def timedShutdown():
 
     # Creates Window
     win = tk.Tk()
+
+    # Local Variable(s)
+    total_time = IntVar(win, 0)
+
+    # Window Setup
     win.title('TIMED SHUTDOWN')
     win.geometry("300x100")
-    # win.geometry("500x500")
     win.eval('tk::PlaceWindow . center')
-
-    total_time = IntVar(win, 0)
 
     # Zeros for Entry Defaults
     zero_text1 = StringVar(win, "0")
@@ -89,7 +92,6 @@ def timedShutdown():
     sec_.grid(row=3, column=2)
 
     def TotalSeconds():
-
         seconds_int = int(sec_.get())
         minutes_float = float(min_.get())
         hours_float = float(hr_.get())
@@ -99,7 +101,7 @@ def timedShutdown():
         hours_converted = convertTimeToSeconds(hours_float, "hours")
 
         result = seconds_converted + minutes_converted + hours_converted
-        print("Total Seconds:", result)
+        # print("Total Seconds:", result)
         total_time.set(result)
         win.destroy()
 
@@ -117,11 +119,17 @@ def timer(total_time):
     root = Tk()
 
     early_exit = BooleanVar(root, False)
+    no_entry = BooleanVar(root, False)
+
+    # Set's No_Entry boolean to True if no time was entered in first window
+    if total_time == 0:
+        no_entry.set(True)
 
     # setting geometry of tk window
     root.geometry("500x125")
     root.eval('tk::PlaceWindow . center')
 
+    # Toggles Early Exit Boolean to True
     def on_closing():
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             root.destroy()
@@ -132,6 +140,7 @@ def timer(total_time):
     # title bar.
     root.title("Time Counter")
 
+    # Convert seconds into Hours, Minutes, Seconds for timer
     times = convertSecondsToTime(total_time)
 
     # Declaration of variables
@@ -165,6 +174,7 @@ def timer(total_time):
 
         while temp > -1:
 
+            # Exit early from window
             if bool(early_exit.get()):
                 return
 
@@ -174,39 +184,27 @@ def timer(total_time):
             if mins > 60:
                 hours, mins = divmod(mins, 60)
 
-            # using format () method to store the value up to
-            # two decimal places
             hour.set("{0:2d}".format(hours))
             minute.set("{0:2d}".format(mins))
             second.set("{0:2d}".format(secs))
 
-            # updating the GUI window after decrementing the
-            # temp value every time
             root.update()
             time.sleep(1)
 
-            # when temp value = 0; then a messagebox pop's up
-            # with a message:"Time's up"
             if temp == 0:
-                print("TIMER EXITED, SHUTTING DOWN IN 5 SECONDS")
-                os.system("shutdown -s -t 5")
-                # messagebox.showinfo("Time Countdown", "Time's up ")
+                if not bool(no_entry.get()):
+                    messagebox.showinfo("EXITING PROGRAM", "Computer will shutdown soon, Goodnight!")
+                    os.system("shutdown -s -t 5")
+                    root.destroy()
+                else:
+                    messagebox.showinfo("ERROR", "USER DID NOT ENTER A TIME TO SHUTDOWN, ABORTING PROGRAM")
+                    root.destroy()
 
-            # after every one sec the value of temp will be decremented
-            # by one
             temp -= 1
-    submit()
 
-    # infinite loop which is required to
-    # run tkinter program infinitely
-    # until an interrupt occurs
+    submit()
     root.mainloop()
 
 
 if __name__ == '__main__':
-
-    # convertTime(3600.9, "seconds")
-    # convertTime(60, "minutes")
-    # convertTime(1.5, "hours")
     timer(timedShutdown())
-
