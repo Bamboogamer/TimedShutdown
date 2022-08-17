@@ -1,8 +1,10 @@
 import math
 import os
+import sys
 import time
 import tkinter as tk
 from tkinter import *
+from tkinter import messagebox
 
 # Fonts
 font_courier10B = "Courier 10 bold"
@@ -51,161 +53,160 @@ def convertSecondsToTime(seconds):
 
 def timedShutdown():
 
-    # Creates Window
-    win = tk.Tk()
+    # Create and Setup Window
+    window = tk.Tk()
+    window.title('TIMED SHUTDOWN')
+    window.geometry("300x100")
+    window.resizable(width=False, height=False)
+    window.eval('tk::PlaceWindow . center')
 
     # Local Variable(s)
-    total_time = IntVar(win, 0)
-
-    # Window Setup
-    win.title('TIMED SHUTDOWN')
-    win.geometry("300x100")
-    win.eval('tk::PlaceWindow . center')
+    total_time = IntVar(window, 0)
 
     # Zeros for Entry Defaults
-    zero_text1 = StringVar(win, "0")
-    zero_text2 = StringVar(win, "0")
-    zero_text3 = StringVar(win, "0")
+    zero_text1 = StringVar(window, "0")
+    zero_text2 = StringVar(window, "0")
+    zero_text3 = StringVar(window, "0")
 
     # Hours
-    label_Hours = StringVar(win, "Enter Hours: ")
-    label_Hours_Dir = Label(win, textvariable=label_Hours, font=font_courier12B)
+    label_Hours = StringVar(window, "Enter Hours: ")
+    label_Hours_Dir = Label(window, textvariable=label_Hours, font=font_courier12B)
     label_Hours_Dir.grid(row=1, column=1)
 
-    hr_ = Entry(win, textvariable=zero_text1, width=entrySize, font=font_courier10B)
+    hr_ = Entry(window, textvariable=zero_text1, width=entrySize, font=font_courier10B)
     hr_.grid(row=1, column=2)
 
     # Minutes
-    label_Minutes = StringVar(win, "Enter Minutes: ")
-    label_Minutes_Dir = Label(win, textvariable=label_Minutes, font=font_courier12B)
+    label_Minutes = StringVar(window, "Enter Minutes: ")
+    label_Minutes_Dir = Label(window, textvariable=label_Minutes, font=font_courier12B)
     label_Minutes_Dir.grid(row=2, column=1)
 
-    min_ = Entry(win, textvariable=zero_text2, width=entrySize, font=font_courier10B)
+    min_ = Entry(window, textvariable=zero_text2, width=entrySize, font=font_courier10B)
     min_.grid(row=2, column=2)
 
     # Seconds
-    label_Seconds = StringVar(win, "Enter Seconds: ")
-    label_Seconds_Dir = Label(win, textvariable=label_Seconds, font=font_courier12B)
+    label_Seconds = StringVar(window, "Enter Seconds: ")
+    label_Seconds_Dir = Label(window, textvariable=label_Seconds, font=font_courier12B)
     label_Seconds_Dir.grid(row=3, column=1)
 
-    sec_ = Entry(win, textvariable=zero_text3, width=entrySize, font=font_courier10B)
+    sec_ = Entry(window, textvariable=zero_text3, width=entrySize, font=font_courier10B)
     sec_.grid(row=3, column=2)
 
     def TotalSeconds():
-        seconds_int = int(sec_.get())
-        minutes_float = float(min_.get())
-        hours_float = float(hr_.get())
+        try:
+            seconds_int = float(sec_.get())
+            minutes_float = float(min_.get())
+            hours_float = float(hr_.get())
 
-        seconds_converted = convertTimeToSeconds(seconds_int, "seconds")
-        minutes_converted = convertTimeToSeconds(minutes_float, "minutes")
-        hours_converted = convertTimeToSeconds(hours_float, "hours")
+            seconds_converted = convertTimeToSeconds(seconds_int, "seconds")
+            minutes_converted = convertTimeToSeconds(minutes_float, "minutes")
+            hours_converted = convertTimeToSeconds(hours_float, "hours")
 
-        result = seconds_converted + minutes_converted + hours_converted
-        # print("Total Seconds:", result)
-        total_time.set(result)
-        win.destroy()
+            result = seconds_converted + minutes_converted + hours_converted
+            # print("Total Seconds:", result)
+            total_time.set(result)
+            window.destroy()
 
-    button = tk.Button(win, text="Timed Shutdown", command=TotalSeconds)
+        except:
+            messagebox.showinfo("ERROR", "USER DID NOT ENTER A VALID TIME TO SHUTDOWN, ABORTING PROGRAM")
+            window.destroy()
+            sys.exit()
+
+    button = tk.Button(window, text="Timed Shutdown", command=TotalSeconds)
     button.grid(row=4, column=2)
 
-    win.mainloop()
+    window.mainloop()
     return int(total_time.get())
 
 
 # https://www.geeksforgeeks.org/create-countdown-timer-using-python-tkinter/
 def timer(total_time):
-    from tkinter import messagebox
 
-    # creating Tk window
-    root = Tk()
+    # Creating and setting geometry of tk window
+    window = Tk()
+    window.geometry("500x125")
+    window.resizable(width=False, height=False)
+    window.eval('tk::PlaceWindow . center')
 
-    early_exit = BooleanVar(root, False)
-    no_entry = BooleanVar(root, False)
+    # Local Variables
+    early_exit = BooleanVar(window, False)
+    no_entry = BooleanVar(window, False)
 
     # Set's No_Entry boolean to True if no time was entered in first window
-    if total_time == 0:
+    if total_time <= 0:
         no_entry.set(True)
-
-    # setting geometry of tk window
-    root.geometry("500x125")
-    root.eval('tk::PlaceWindow . center')
+        messagebox.showinfo("ERROR", "USER DID NOT ENTER A TIME TO SHUTDOWN, ABORTING PROGRAM")
+        window.destroy()
+        sys.exit()
 
     # Toggles Early Exit Boolean to True
     def on_closing():
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
-            root.destroy()
+            window.destroy()
             early_exit.set(True)
 
     # Using title() to display a message in
     # the dialogue box of the message in the
     # title bar.
-    root.title("Time Counter")
+    window.title("Shutdown Countdown")
 
     # Convert seconds into Hours, Minutes, Seconds for timer
     times = convertSecondsToTime(total_time)
 
     # Declaration of variables
-    hour = StringVar(root, str(times[0]))
-    minute = StringVar(root, str(times[1]))
-    second = StringVar(root, str(times[2]))
+    hour = StringVar(window, str(times[0]))
+    minute = StringVar(window, str(times[1]))
+    second = StringVar(window, str(times[2]))
 
     # Label
-    label = Label(root, textvariable=StringVar(root, "TIME LEFT UNTIL SHUTDOWN"), font=font_courier22B)
+    label = Label(window, textvariable=StringVar(window, "TIME LEFT UNTIL SHUTDOWN"), font=font_courier22B)
     label.grid(row=0, column=1)
 
     # Use of Entry class to take input from the user
-    hourEntry = Entry(root, width=3, font=font_courier18B,
-                      textvariable=hour)
+    hourEntry = Entry(window, width=3, font=font_courier18B, textvariable=hour)
     hourEntry.grid(row=1, column=0)
 
-    minuteEntry = Entry(root, width=3, font=font_courier18B,
-                        textvariable=minute)
+    minuteEntry = Entry(window, width=3, font=font_courier18B, textvariable=minute)
     minuteEntry.grid(row=1, column=1)
 
-    secondEntry = Entry(root, width=3, font=font_courier18B,
-                        textvariable=second)
+    secondEntry = Entry(window, width=3, font=font_courier18B, textvariable=second)
     secondEntry.grid(row=1, column=2)
 
-    text = Label(root, textvariable=StringVar(root, "Exit this window to cancel Timed Shutdown"), font=font_courier12B)
+    text = Label(window, textvariable=StringVar(window, "Exit this window to cancel Timed Shutdown"), font=font_courier12B)
     text.grid(rows=2, column=1)
 
-    def submit():
-        temp = total_time
-        root.protocol("WM_DELETE_WINDOW", on_closing)
+    def countdown():
+        time_left = total_time
+        window.protocol("WM_DELETE_WINDOW", on_closing)
 
-        while temp > -1:
+        while time_left > -1:
 
             # Exit early from window
             if bool(early_exit.get()):
-                return
+                sys.exit()
 
-            mins, secs = divmod(temp, 60)
-
+            # Convert Time Left to hours, minutes, seconds
+            min_, secs = divmod(time_left, 60)
             hours = 0
-            if mins > 60:
-                hours, mins = divmod(mins, 60)
+            if min_ > 60:
+                hours, min_ = divmod(min_, 60)
 
             hour.set("{0:2d}".format(hours))
-            minute.set("{0:2d}".format(mins))
+            minute.set("{0:2d}".format(min_))
             second.set("{0:2d}".format(secs))
 
-            root.update()
+            window.update()
             time.sleep(1)
 
-            if temp == 0:
-                if not bool(no_entry.get()):
-                    messagebox.showinfo("EXITING PROGRAM", "Computer will shutdown soon, Goodnight!")
-                    os.system("shutdown -s -t 5")
-                    root.destroy()
-                else:
-                    messagebox.showinfo("ERROR", "USER DID NOT ENTER A TIME TO SHUTDOWN, ABORTING PROGRAM")
-                    root.destroy()
+            time_left -= 1
+            if time_left <= 0:
+                os.system("shutdown -s -t 5")
+                window.destroy()
 
-            temp -= 1
-
-    submit()
-    root.mainloop()
+    countdown()
+    window.mainloop()
 
 
 if __name__ == '__main__':
-    timer(timedShutdown())
+    timeEntered = timedShutdown()
+    timer(timeEntered)
