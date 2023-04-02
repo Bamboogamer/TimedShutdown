@@ -19,6 +19,9 @@ entrySize = 15
 # Helper Method(s)
 def convertTimeToSeconds(num, time_str):
     time_str = time_str.lower()
+    if num == "":
+        num = "0"
+
     result = num
 
     if time_str in ["second", "seconds", "sec", "s"]:
@@ -92,11 +95,23 @@ def timedShutdown():
     sec_ = Entry(window, textvariable=zero_text3, width=entrySize, font=font_courier10B)
     sec_.grid(row=3, column=2)
 
+    entries = [hr_, min_, sec_]
+
+    for i in entries:
+        if i.get() == "":
+            i.setvar("0")
+
     def TotalSeconds():
         try:
-            seconds_int = float(sec_.get())
-            minutes_float = float(min_.get())
-            hours_float = float(hr_.get())
+            entries_ = [sec_.get(), min_.get(), hr_.get()]
+
+            for x in range(len(entries_)):
+                if entries_[x] == "":
+                    entries_[x] = "0"
+
+            seconds_int = float(entries_[0])
+            minutes_float = float(entries_[1])
+            hours_float = float(entries_[2])
 
             seconds_converted = convertTimeToSeconds(seconds_int, "seconds")
             minutes_converted = convertTimeToSeconds(minutes_float, "minutes")
